@@ -5,12 +5,14 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import KeyExchangeServer
 import CryptoSessionStart
+import hashlib, hmac
 
 #Need to import database.py, KeyExchangeServer.py, CryptoSessionStart.py
 HEADERLENGTH = 10
 
 sessionKeys = {}
 IVs = {}
+
 
 def interpretConfig(file):
 	file = open(file, "r")
@@ -29,7 +31,11 @@ def interpretConfig(file):
 			continue
 	return configDict
 
-
+def HMACGen(key, message):
+	key = key.encode('utf-8')
+	message = message.encode('utf-8')
+	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()
+	return HMAC
 
 #Used for all conversation pre CryptoSessionStart
 def receiveMessage(clientSocket):
@@ -62,7 +68,6 @@ def receiveMessageEncrypted(clientSocket, source):
 	message = str(message)
 	return message
 
-#Used for all conversation post CryptoSessionStart
 def sendMessageEncrypted(clientSocket, message, source):
 	IV = IVs[source]
 	sessionKey = sessionKeys[source]
@@ -88,6 +93,8 @@ def encryptMessage(data, sessionKey, IV):
 	return payload
 
 
+
+
 def main():
 
 	#serverConfig = interpretConfig("/var/Agent/Server/serverConfig.txt")
@@ -102,6 +109,7 @@ def main():
 	serverSocket.listen()
 	sockets_list = [serverSocket]
 	clients = {}
+	HMAC = interpretConfig(open("/var/Agent/Server/hmacs.txt", "r"))
 	#secrets = database.secretTable()
 	secrets = {}
 	print ("\n")
@@ -122,6 +130,12 @@ def main():
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
 				status = variables[2]
+				HMACToCheck = variables[3]
+				HMACToComp = HMACGen(HMAC[source],source)
+
+				if HMACToCheck != HMACToComp:
+					continue 
+
 				if source in secrets and "PHASE2" in status:
              		#If a long-term secret exists in the database
 					sockets_list.append(clientSocket)

@@ -10,6 +10,7 @@ from math import sqrt
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+import hmac
 
 HEADERLENGTH = 10
 
@@ -98,6 +99,13 @@ def findPrimitive( n) :
   
     # If no primitive root found  
     return -1
+
+
+def HMACGen(key, message):
+	key = key.encode('utf-8')
+	message = message.encode('utf-8')
+	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()
+	return HMAC
 
 #Used for Diffehellman
 def sendMessage(clientSocket, message):
@@ -279,6 +287,7 @@ def main(log):
 	IP = "192.168.163.131"
 	PORT = 1337
 	hostname = "client1"
+	HMAC = interpretConfig(open("/var/Agent/Client/hmacs.txt", "r"))
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
@@ -292,7 +301,7 @@ def main(log):
 		status = "PHASE1"
 
 
-	message = f'{hostname},{N1},{status}'
+	message = f'{hostname},{N1},{status},{HMACGen(HMAC[hostname],hostname)}'
 	sendMessage(clientSocket, message)
 
 	status = receiveMessage(clientSocket)
