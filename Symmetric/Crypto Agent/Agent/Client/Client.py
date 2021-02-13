@@ -73,7 +73,8 @@ def sendMessageEncryptedCBC(clientSocket, message, sessionKey, IV):
 
 
 def decryptMessageCBC(payload, sessionKey, IV):
-	secret = sessionKey.encode('utf-8')
+	sessionKey = sessionKey.encode('utf-8')
+	#If this breaks, revert to not encoding the sessionkey
 	IV = IV.encode('utf-8')
 	cipher = AES.new(sessionKey, AES.MODE_CBC, IV)
 	data = unpad(cipher.decrypt(payload), 256)
@@ -178,14 +179,14 @@ def diffeHellman(clientSocket):
 	return secret
 
 
-def cryptoSessionStart(clientSocket, secret, N1):
+def cryptoSessionStart(clientSocket, secret, HMACKey, N1):
 	#N2+N1, N2
 	message = receiveMessageEncryptedECB(clientSocket, secret)
 	variables = message.split(",")
 	serverAuth = int(variables[0])
 	N2 = int(variables[1])
 	HMACToCheck = variables[2]
-	HMACToComp = HMACGen(HMAC[hostname], N2)
+	HMACToComp = HMACGen(HMACKey, N2)
 	
 	if HMACToCheck != HMACToComp:
 		return "fail" 
@@ -196,7 +197,7 @@ def cryptoSessionStart(clientSocket, secret, N1):
 	print ("Server Has Been Authed")
 
 	N3 = random.getrandbits(128)
-	message = f'{N2+N3},{N3},{HMACGen(HMAC[hostname],N3)'
+	message = f'{N2+N3},{N3},{HMACGen(HMACKey,N3)}'
 	sendMessageEncryptedECB(clientSocket, message, secret)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
@@ -227,6 +228,7 @@ def main(log):
 	PORT = 1337
 	hostname = "client1"
 	HMAC = interpretConfig(open("/var/Agent/Client/hmacs.txt", "r"))
+	HMACKey = HMAC[hostname]
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
@@ -243,7 +245,7 @@ def main(log):
 
 	status = "PHASE1"
 
-	#message = f'{hostname},{N1},{status},{HMACGen(HMAC[hostname],hostname)}'
+	#message = f'{hostname},{N1},{status},{HMACGen(HMACKey,hostname)}'
 	message = f'{hostname},{N1},{status}'
 	sendMessage(clientSocket, message)
 
@@ -252,7 +254,8 @@ def main(log):
 	if "PHASE1" in status:
 		secret = diffeHellman(clientSocket)
 		phase = receiveMessage(clientSocket)
-		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
+		print(phase)
+		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
 	'''
 	if "PHASE2" in status:
 		secret = file.readline()

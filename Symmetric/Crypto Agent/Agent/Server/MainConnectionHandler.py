@@ -129,7 +129,7 @@ def main():
 				source = variables[0]
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
-				status = variables[2]
+				#status = variables[2] Not using because of commented out code below
 				'''
 				Moving Elsewhere
 				HMACToCheck = variables[3]
@@ -180,7 +180,7 @@ def main():
 				#database.createEntry(table = sources, source = source, secret = sourceSecret)
 	            #Update current dictonary
 				secrets[source] = sourceSecret
-				HMAC[source] = sourceHMACKey
+				sourceHMACKey = HMAC[source]
 				sockets_list.append(clientSocket)
 				clients[clientSocket] = source
 				print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
