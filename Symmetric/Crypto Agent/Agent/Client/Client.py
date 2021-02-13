@@ -28,78 +28,6 @@ def isPrime(n):
 	return True  
 
 
-def genPrime(min, max):
-	primes = [i for i in range(min,max) if isPrime(i)]
-	p = random.choice(primes)
-	return p
-
-
-  
-# Utility function to store prime 
-# factors of a number  
-def findPrimefactors(s, n) : 
-  
-    # Print the number of 2s that divide n  
-    while (n % 2 == 0) : 
-        s.add(2)  
-        n = n // 2
-  
-    # n must be odd at this po. So we can   
-    # skip one element (Note i = i +2)  
-    for i in range(3, int(sqrt(n)), 2): 
-          
-        # While i divides n, print i and divide n  
-        while (n % i == 0) : 
-  
-            s.add(i)  
-            n = n // i  
-          
-    # This condition is to handle the case  
-    # when n is a prime number greater than 2  
-    if (n > 2) : 
-        s.add(n)  
-  
-# Function to find smallest primitive  
-# root of n  
-
-def findPrimitive( n) : 
-    s = set()  
-
-    # Check if n is prime or not  
-    if (isPrime(n) == False):  
-        return -1
-  
-    # Find value of Euler Totient function  
-    # of n. Since n is a prime number, the  
-    # value of Euler Totient function is n-1  
-    # as there are n-1 relatively prime numbers. 
-    phi = n - 1
-  
-    # Find prime factors of phi and store in a set  
-    findPrimefactors(s, phi)  
-  
-    # Check for every number from 2 to phi  
-    for r in range(2, phi + 1):  
-  
-        # Iterate through all prime factors of phi.  
-        # and check if we found a power with value 1  
-        flag = False
-        for it in s:  
-  
-            # Check if r^((phi)/primefactors) 
-            # mod n is 1 or not  
-            if (pow(r, phi // it, n) == 1):  
-  
-                flag = True
-                break
-              
-        # If there was no power with value 1.  
-        if (flag == False): 
-            return r  
-  
-    # If no primitive root found  
-    return -1
-
 
 def HMACGen(key, message):
 	key = key.encode('utf-8')
@@ -211,14 +139,21 @@ def interpretConfig(file):
 
 
 def diffeHellman(clientSocket):
+	message = receiveMessage(clientSocket)
+	diffeVars = message.split(",")
+	p = int(diffeVars[0])
+	g = int(diffeVars[1])
+
+	'''
 	min = 100000
 	max = 999999
 	p = genPrime(min, max)
 	g = findPrimitive(p)
 	message =  f'{p},{g}'
-	
 	sendMessage(clientSocket, message)
-	a = random.randint(0, 10000)
+	'''
+
+	a = random.randint(1000000, 2000000)
 	A = (g**a) % p 
 	
 	sendMessage(clientSocket, A)
@@ -249,7 +184,11 @@ def cryptoSessionStart(clientSocket, secret, N1):
 	variables = message.split(",")
 	serverAuth = int(variables[0])
 	N2 = int(variables[1])
-
+	HMACToCheck = variables[2]
+	HMACToComp = HMACGen(HMAC[hostname], N2)
+	
+	if HMACToCheck != HMACToComp:
+		return "fail" 
 
 	if (serverAuth - N1) != N2:
 		return "fail"
@@ -257,7 +196,7 @@ def cryptoSessionStart(clientSocket, secret, N1):
 	print ("Server Has Been Authed")
 
 	N3 = random.getrandbits(128)
-	message = f'{N2+N3},{N3}'
+	message = f'{N2+N3},{N3},{HMACGen(HMAC[hostname],N3)'
 	sendMessageEncryptedECB(clientSocket, message, secret)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
@@ -293,15 +232,19 @@ def main(log):
 	clientSocket.connect((IP, PORT))
 	N1 = random.getrandbits(128)
 
+	'''
 	try:
 		file = open("/var/Agent/Secure/secret.txt", "r")
 		status = "PHASE2"
 
 	except:
 		status = "PHASE1"
+	'''
 
+	status = "PHASE1"
 
-	message = f'{hostname},{N1},{status},{HMACGen(HMAC[hostname],hostname)}'
+	#message = f'{hostname},{N1},{status},{HMACGen(HMAC[hostname],hostname)}'
+	message = f'{hostname},{N1},{status}'
 	sendMessage(clientSocket, message)
 
 	status = receiveMessage(clientSocket)

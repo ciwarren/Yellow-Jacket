@@ -47,13 +47,18 @@ def encryptMessageECB(data, secret):
 	payload = cipher.encrypt(data)
 	return payload
 
+def HMACGen(key, message):
+	key = key.encode('utf-8')
+	message = message.encode('utf-8')
+	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()
+	return HMAC
 
-def main(socket, secret, N1):
+def main(socket, secret, HMACKey, N1):
 	cryptoVariables = {}
 	message = f'PHASE2'
 	sendMessage(socket, message)
 	N2 = random.getrandbits(128)
-	message = f'{N2+N1},{N2}'
+	message = f'{N2+N1},{N2},{HMACGen(HMACKey, N2)}'
 	sendMessageEncryptedECB(socket, message, secret)
 
 	#N2+N3, N3
@@ -61,6 +66,11 @@ def main(socket, secret, N1):
 	variables = message.split(",")
 	clientAuth = int(variables[0])
 	N3 = int(variables[1])
+	
+	HMACToCheck = variables[2]
+	HMACToComp = HMACGen(HMACKey, N3)
+	if HMACToCheck != HMACToComp:
+		return "abort connection" 
 
 	if (clientAuth - N2) != N3:
 		return "abort connection"
