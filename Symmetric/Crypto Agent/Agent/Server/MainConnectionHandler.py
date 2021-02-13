@@ -123,7 +123,7 @@ def main():
 			# If notified socket is a server socket - new connection, accept it
 			if notified_socket == serverSocket:
 				clientSocket, clientAddress = serverSocket.accept()
-                #First message format is (Hostname, N1)
+                #First message format is (Hostname, N1, status)
 				message = receiveMessage(clientSocket)
 				variables = message.split(",")
 				source = variables[0]

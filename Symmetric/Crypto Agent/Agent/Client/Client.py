@@ -253,11 +253,11 @@ def main(log):
 		secret = diffeHellman(clientSocket)
 		phase = receiveMessage(clientSocket)
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
-
+	'''
 	if "PHASE2" in status:
 		secret = file.readline()
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
-
+	'''
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
 

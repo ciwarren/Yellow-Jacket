@@ -74,6 +74,7 @@ def main(socket, secret, HMACKey, N1):
 
 	if (clientAuth - N2) != N3:
 		return "abort connection"
+		
 	print ("Client Has Been Authed")
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
 	N2 = hashlib.sha256(str(N2).encode()).hexdigest()
