@@ -154,7 +154,7 @@ def diffeHellman(clientSocket):
 	sendMessage(clientSocket, message)
 	'''
 
-	a = random.randint(1000000, 2000000)
+	a = random.getrandbits(160)
 	A = (g**a) % p 
 	
 	sendMessage(clientSocket, A)
