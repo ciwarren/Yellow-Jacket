@@ -125,11 +125,6 @@ def cryptoSessionStart(clientSocket, N1, privateKey):
 	variables = message.split(",")
 	serverAuth = int(variables[0])
 	N2 = int(variables[1])
-	HMACToCheck = variables[2]
-	HMACToComp = HMACGen(HMACKey, N2)
-	
-	if HMACToCheck != HMACToComp:
-		return "fail" 
 
 	if (serverAuth - N1) != N2:
 		return "fail"
@@ -137,7 +132,7 @@ def cryptoSessionStart(clientSocket, N1, privateKey):
 	print ("Server Has Been Authed")
 
 	N3 = random.getrandbits(128)
-	message = f'{N2+N3},{N3},{HMACGen(HMACKey,N3)}'
+	message = f'{N2+N3},{N3}'
 	sendMessageEncryptedECB(clientSocket, message, secret)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
