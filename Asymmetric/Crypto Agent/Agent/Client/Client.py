@@ -119,7 +119,7 @@ def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 
 	print ("Server Has Been Authed")
 
-	N3 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	N3 = random.getrandbits(128)
 	message = f'{N3},{N2+N3}'
 	sendMessageRSA(clientSocket, message, serverPublicKey)
 
@@ -158,7 +158,7 @@ def main(log):
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
-	N1 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	N1 = random.getrandbits(128)
 
 	'''
 	try:

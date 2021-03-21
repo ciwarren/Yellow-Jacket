@@ -22,7 +22,7 @@ def receiveMessageRSA(clientSocket, serverPrivateKey):
 
 def sendMessageRSA(clientSocket, message, clientPublicKey):
 	message = str(message)
-	message = rsa.encrypt(message.encode('utf-8'), clientPublicKey)
+	rsa.encrypt(message.encode('utf-8'), clientPublicKey)
 	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublicKey)
 	clientSocket.send(messageHeader + message)
 	return
@@ -30,14 +30,14 @@ def sendMessageRSA(clientSocket, message, clientPublicKey):
 def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
 	N2 = random.getrandbits(128)
-	message = f'{N2},{N2+N1}'
+	message = f'{N2+N1},{N2}'
 	sendMessageRSA(socket, message, clientPublicKey)
 
 	#N2+N3, N3
 	message = receiveMessageRSA(socket, serverPrivateKey)
 	variables = message.split(",")
-	clientAuth = int(variables[1])
-	N3 = int(variables[0])
+	clientAuth = int(variables[0])
+	N3 = int(variables[1])
 
 	if (clientAuth - N2) != N3:
 		return "abort connection"
