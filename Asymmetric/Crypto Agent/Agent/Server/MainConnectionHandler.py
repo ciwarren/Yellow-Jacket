@@ -27,22 +27,11 @@ except:
 	print("Generating keys, could not find them locally!")
 	(publicKey, privateKey) = rsa.newkeys(512)
 	
-	
-	try:
-		open("public.pem", "x")
-		file = open("public.pem", "wb")
-	except:
-		file = open("public.pem", "wb")
-
+	file = open("public.pem", "w")
 	file.write(publicKey)
 	file.close()
 
-	try:
-		open("private.pem", "x")
-		file = open("private.pem", "wb")
-	except:
-		file = open("private.pem", "wb")
-		
+	file = open("private.pem", "w")
 	file.write(privateKey)
 	file.close()
 	
