@@ -5,13 +5,29 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import KeyExchangeServer
 import CryptoSessionStart
-import hashlib, hmac
+import hashlib, rsa
 
 #Need to import database.py, KeyExchangeServer.py, CryptoSessionStart.py
 HEADERLENGTH = 10
 
 sessionKeys = {}
+clientPublicKeys = {}
 IVs = {}
+
+	#Load RSA Server Private 
+try:
+	with open('private.pem', mode='rb') as privateFile:
+		keydata = privateFile.read()
+	privateKey = rsa.PrivateKey.load_pkcs1(keydata)
+
+	with open('public.pem', mode='rb') as publicFile:
+		keydata = publicFile.read()
+	publicKey = rsa.PrivateKey.load_pkcs1(keydata)
+	
+except:
+	print("Generating keys, could not find them locally!")
+	(publicKey, privateKey) = rsa.newkeys(512)
+	#TODO: Write these to file
 
 
 def interpretConfig(file):
@@ -49,6 +65,15 @@ def sendMessage(clientSocket, message):
 	messageHeader = f"{len(message):<{HEADERLENGTH}}".encode('utf-8')
 	clientSocket.send(messageHeader + message)
 	return
+
+def receiveMessageRSA(clientSocket):
+	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
+	messageHeader = messageHeader.decode('utf-8')
+	messageLength = int(messageHeader.strip())
+	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
+	message = message.decode('utf-8')
+	message = str(message)
+	return message
 
 
 #Used for all conversation post CryptoSessionStart
@@ -106,24 +131,10 @@ def main():
 	clients = {}
 
 	#secrets = database.secretTable()
-	#Load RSA Server Private 
-	try:
-		with open('private.pem', mode='rb') as privateFile:
-			keydata = privateFile.read()
-		privateKey = rsa.PrivateKey.load_pkcs1(keydata)
-
-		with open('public.pem', mode='rb') as publicFile:
-			keydata = publicFile.read()
-		publicKey = rsa.PrivateKey.load_pkcs1(keydata)
-	
-	except:
-		print("Generating keys, could not find them locally!")
-		(publicKey, privateKey) = rsa.newkeys(512)
-
-		#TODO: Write these to file
 
 
-	publicKeys = {}
+	#Used for client public keys to encrypt messages to them
+
 	secrets = {}
 	print ("\n")
 
@@ -144,7 +155,7 @@ def main():
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
 				#TODO: Make sure the line below will work for next message
-				publicKeys[source] = variables[2]
+				clientPublicKeys[source] = variables[2]
 				#status = variables[2] Not using because of commented out code below
 				'''
 				Moving Elsewhere
@@ -198,7 +209,7 @@ def main():
 				clients[clientSocket] = source
 				print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
 				#TODO: Change crypto variables start to match flow diagram
-				cryptoVariables = CryptoSessionStart.main(clientSocket, source, publicKeys[source], N1)
+				cryptoVariables = CryptoSessionStart.main(clientSocket, source, clientPublicKeys[source], N1)
 				if  "abort connection" in cryptoVariables:
 					print ("Connection Aborted")
 					return
