@@ -80,9 +80,13 @@ def receiveMessageRSA(clientSocket, privateKey):
 
 def sendMessageRSA(clientSocket, message, serverPublicKey):
 	message = str(message)
-	message = rsa.encrypt(message.encode('utf-8'), serverPublicKey)
-	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), serverPublicKey)
-	clientSocket.send(messageHeader + message)
+	messageTotal = []
+	while len (message) > 0:
+		messageTotal.append(rsa.encrypt(message[0:min(53,len(message))].encode('utf-8'), serverPublicKey))
+		message = message[min(53,len(message)):]
+	messageTotal = ','.join(messageTotal)
+	messageHeader = rsa.encrypt(f"{len(messageTotal):<{HEADERLENGTH}}".encode('utf-8'), serverPublicKey)
+	clientSocket.send(messageHeader + messageTotal)
 	return
 
 
