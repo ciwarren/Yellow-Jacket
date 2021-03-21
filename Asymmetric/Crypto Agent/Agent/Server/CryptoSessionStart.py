@@ -12,19 +12,18 @@ HEADERLENGTH = 10
 
 
 def receiveMessageRSA(clientSocket, serverPrivateKey):
-	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
+	messageHeader = rsa.decrypt(clientSocket.recv(256), serverPrivateKey)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
+	message = rsa.decrypt(clientSocket.recv(messageLength), serverPrivateKey)
 	message = message.decode('utf-8')
 	message = str(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, clientPublicKey):
-	clientPublic = clientPublicKeys[source]
 	message = str(message)
-	message = rsa.encrypt(message.encode('utf-8'), clientPublic)
-	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublic)
+	message = rsa.encrypt(message.encode('utf-8'), clientPublicKey)
+	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublicKey)
 	clientSocket.send(messageHeader + message)
 	return
 
