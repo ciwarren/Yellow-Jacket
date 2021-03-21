@@ -216,7 +216,7 @@ def main():
 				clients[clientSocket] = source
 				print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
 				#TODO: Change crypto variables start to match flow diagram
-				cryptoVariables = CryptoSessionStart.main(clientSocket, source, clientPublicKeys[source], N1)
+				cryptoVariables = CryptoSessionStart.main(clientSocket, source, clientPublicKeys[source], privateKey, N1)
 				if  "abort connection" in cryptoVariables:
 					print ("Connection Aborted")
 					return

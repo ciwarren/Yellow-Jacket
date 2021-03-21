@@ -5,64 +5,39 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from socketserver import socket
 import random
-import hashlib
+import rsa
 
 
 HEADERLENGTH = 10
 
-def sendMessage(clientSocket, message):
-	message = str(message)
-	message = message.encode('utf-8')
-	messageHeader = f"{len(message):<{HEADERLENGTH}}".encode('utf-8')
-	clientSocket.send(messageHeader + message)
-	return
 
-def receiveMessageEncryptedECB(clientSocket, secret):
-	messageHeader = decryptMessageECB(clientSocket.recv(256), secret)
+def receiveMessageRSA(clientSocket, serverPrivateKey):
+	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = decryptMessageECB(clientSocket.recv(messageLength), secret)
+	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
 	message = message.decode('utf-8')
 	message = str(message)
 	return message
 
-
-def sendMessageEncryptedECB(clientSocket, message, secret):
+def sendMessageRSA(clientSocket, message, clientPublicKey):
+	clientPublic = clientPublicKeys[source]
 	message = str(message)
-	message = encryptMessageECB (message.encode('utf-8'), secret)
-	messageHeader = encryptMessageECB(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), secret)
+	message = rsa.encrypt(message.encode('utf-8'), clientPublic)
+	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublic)
 	clientSocket.send(messageHeader + message)
 	return
 
-def decryptMessageECB(payload, secret):
-	secret = secret.encode('utf-8')
-	cipher = AES.new(secret, AES.MODE_ECB)
-	data = unpad(cipher.decrypt(payload), 256)
-	return data
-
-def encryptMessageECB(data, secret):
-	secret = secret.encode('utf-8')
-	cipher = AES.new(secret, AES.MODE_ECB)
-	data = pad(data,256)
-	payload = cipher.encrypt(data)
-	return payload
-
-def HMACGen(key, message):
-	key = key.encode('utf-8')
-	message = message.encode('utf-8')
-	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()
-	return HMAC
-
-def main(socket, secret, clientPublicKey N1):
+def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
 	message = f'PHASE2'
 	sendMessage(socket, message)
 	N2 = random.getrandbits(128)
 	message = f'{N2+N1},{N2}'
-	sendMessageEncryptedECB(socket, message, secret)
+	sendMessageRSA(socket, message, clientPublicKey)
 
 	#N2+N3, N3
-	message = receiveMessageEncryptedECB(socket, secret)
+	message = receiveMessageRSA(socket, serverPrivateKey)
 	variables = message.split(",")
 	clientAuth = int(variables[0])
 	N3 = int(variables[1])
