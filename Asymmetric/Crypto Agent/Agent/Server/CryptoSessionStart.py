@@ -29,8 +29,6 @@ def sendMessageRSA(clientSocket, message, clientPublicKey):
 
 def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
-	message = f'PHASE2'
-	sendMessage(socket, message)
 	N2 = random.getrandbits(128)
 	message = f'{N2+N1},{N2}'
 	sendMessageRSA(socket, message, clientPublicKey)

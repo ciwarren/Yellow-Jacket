@@ -169,8 +169,6 @@ def main(log):
 		status = "PHASE1"
 	'''
 
-	status = "PHASE1"
-
 	#message = f'{hostname},{N1},{status},{HMACGen(HMACKey,hostname)}'
 	#TODO: Send Client Public Key in this message
 	message = f'{hostname},{N1},{publicKey}'
