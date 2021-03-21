@@ -158,7 +158,7 @@ def main(log):
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
-	N1 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	N1 = random.getrandbits(128)
 
 	'''
 	try:
