@@ -107,6 +107,22 @@ def main():
 
 	#secrets = database.secretTable()
 	#Load RSA Server Private 
+	try:
+		with open('private.pem', mode='rb') as privateFile:
+			keydata = privateFile.read()
+		privateKey = rsa.PrivateKey.load_pkcs1(keydata)
+
+		with open('public.pem', mode='rb') as publicFile:
+			keydata = publicFile.read()
+		publicKey = rsa.PrivateKey.load_pkcs1(keydata)
+	
+	except:
+		print("Generating keys, could not find them locally!")
+		(publicKey, privateKey) = rsa.newkeys(512)
+
+		#TODO: Write these to file
+
+
 	publicKeys = {}
 	secrets = {}
 	print ("\n")

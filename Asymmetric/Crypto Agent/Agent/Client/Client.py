@@ -10,7 +10,7 @@ from math import sqrt
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-import hmac
+import rsa
 
 HEADERLENGTH = 10
 
@@ -161,6 +161,7 @@ def main(log):
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
 	#TODO: Load client keys
+	(publicKey, privateKey) = rsa.newkeys(512)
 	lIP = '192.168.163.130'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
