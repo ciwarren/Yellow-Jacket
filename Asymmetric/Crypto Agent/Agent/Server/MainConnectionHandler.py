@@ -75,6 +75,14 @@ def receiveMessageRSA(clientSocket):
 	message = str(message)
 	return message
 
+def sendMessageRSA(clientSocket, message, source):
+	clientPublic = clientPublicKeys[source]
+	message = str(message)
+	message = rsa.encrypt(message.encode('utf-8'), clientPublic)
+	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublic)
+	clientSocket.send(messageHeader + message)
+	return
+
 
 #Used for all conversation post CryptoSessionStart
 def receiveMessageEncrypted(clientSocket, source):
