@@ -27,12 +27,12 @@ except:
 	print("Generating keys, could not find them locally!")
 	(publicKey, privateKey) = rsa.newkeys(512)
 	
-	file = open("public.pem", "w")
-	file.write(publicKey)
+	file = open("public.pem", "wb")
+	file.write(bytes(publicKey))
 	file.close()
 
-	file = open("private.pem", "w")
-	file.write(privateKey)
+	file = open("private.pem", "wb")
+	file.write(bytes(privateKey))
 	file.close()
 	
 	
@@ -135,7 +135,7 @@ def main():
 	#serverConfig = interpretConfig("/var/Agent/Server/serverConfig.txt")
 	#lIP = serverConfig[ServerIP]
 	#lPort = serverConfig[ServerPort]
-	lIP = "192.168.163.158"
+	lIP = "192.168.1.158"
 	lPort = 1337
 	localAddress = (lIP,lPort, )
 	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
