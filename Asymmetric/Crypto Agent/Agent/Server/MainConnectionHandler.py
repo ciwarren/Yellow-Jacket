@@ -72,14 +72,20 @@ def sendMessage(clientSocket, message):
 	return
 
 def receiveMessageRSA(clientSocket):
+	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
+	messageHeader = messageHeader.decode('utf-8')
+	messageLength = int(messageHeader.strip())
 	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
+	message = message.decode('utf-8')
 	message = str(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, source):
 	clientPublic = clientPublicKeys[source]
-	message = rsa.encrypt(message, clientPublic)
-	clientSocket.send(message)
+	message = str(message)
+	message = rsa.encrypt(message.encode('utf-8'), clientPublic)
+	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublic)
+	clientSocket.send(messageHeader + message)
 	return
 
 
@@ -162,8 +168,8 @@ def main():
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
 				#TODO: Make sure the line below will work for next message
-				clientPublicKeys[source] = rsa.PublicKey.load_pkcs1(variables[2])
-				print(clientPublicKeys[source])
+				clientPublicKeys[source] = variables[2]
+				serverPublicKey = rsa.PublicKey.load_pkcs1(keydata)
 				#status = variables[2] Not using because of commented out code below
 				'''
 				Moving Elsewhere
