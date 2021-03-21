@@ -6,30 +6,42 @@ from Crypto.Util.Padding import pad, unpad
 from socketserver import socket
 import random
 import rsa
-
+import math
+import hashlib
 
 HEADERLENGTH = 10
 
 
 def receiveMessageRSA(clientSocket, serverPrivateKey):
-	messageHeader = rsa.decrypt(clientSocket.recv(256), serverPrivateKey)
+	messageHeader = rsa.decrypt(clientSocket.recv(64), serverPrivateKey)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = rsa.decrypt(clientSocket.recv(messageLength), serverPrivateKey)
-	message = message.decode('utf-8')
+	messageTotal = clientSocket.recv(messageLength)
+	message = ''
+	for x in range(0,math.floor(messageLength/64)):
+		message+= rsa.decrypt(messageTotal[(x*64):((x+1)*64)], serverPrivateKey).decode('utf-8')
 	message = str(message)
+	print(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, clientPublicKey):
 	message = str(message)
-	rsa.encrypt(message.encode('utf-8'), clientPublicKey)
-	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublicKey)
-	clientSocket.send(messageHeader + message)
+	print(message)
+	messageChunks = []
+	messageTotal = b''
+	while len (message) > 0:
+		encryptedChunk = rsa.encrypt(message[0:min(53,len(message))].encode('utf-8'), clientPublicKey)
+		messageTotal += encryptedChunk
+		message = message[min(53,len(message)):]
+	messageHeader = rsa.encrypt(f"{len(messageTotal):<{HEADERLENGTH}}".encode('utf-8'), clientPublicKey)
+	clientSocket.send(messageHeader + messageTotal)
 	return
 
 def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
 	N2 = random.getrandbits(128)
+	print(N1)
+	print(N2)
 	message = f'{N2+N1},{N2}'
 	sendMessageRSA(socket, message, clientPublicKey)
 

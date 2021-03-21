@@ -10,6 +10,7 @@ import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import rsa
+import math
 
 HEADERLENGTH = 10
 
@@ -70,22 +71,27 @@ def encryptMessageCBC(data, sessionKey, IV):
 
 
 def receiveMessageRSA(clientSocket, privateKey):
-	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
+	messageHeader = rsa.decrypt(clientSocket.recv(64), privateKey)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
-	message = message.decode('utf-8')
+	messageTotal = clientSocket.recv(messageLength)
+	message = ''
+	for x in range(0,math.floor(messageLength/64)):
+		message+= rsa.decrypt(messageTotal[(x*64):((x+1)*64)], privateKey).decode('utf-8')
 	message = str(message)
+	print(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, serverPublicKey):
 	message = str(message)
-	messageTotal = []
+	messageChunks = []
+	messageTotal = b''
 	while len (message) > 0:
-		messageTotal.append(rsa.encrypt(message[0:min(53,len(message))].encode('utf-8'), serverPublicKey))
+		encryptedChunk = rsa.encrypt(message[0:min(53,len(message))].encode('utf-8'), serverPublicKey)
+		messageTotal += encryptedChunk
 		message = message[min(53,len(message)):]
-	messageTotal = ','.join(messageTotal)
 	messageHeader = rsa.encrypt(f"{len(messageTotal):<{HEADERLENGTH}}".encode('utf-8'), serverPublicKey)
+	print(messageHeader)
 	clientSocket.send(messageHeader + messageTotal)
 	return
 
@@ -114,9 +120,10 @@ def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	#N2+N1, N2
 	#TODO: Recieve message encrypted with client publickey
 	message = receiveMessageRSA(clientSocket, privateKey)
+	print(message)
 	variables = message.split(",")
-	serverAuth = int(variables[1])
-	N2 = int(variables[0])
+	serverAuth = int(variables[0])
+	N2 = int(variables[1])
 
 	if (serverAuth - N1) != N2:
 		return "fail"
@@ -124,7 +131,7 @@ def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	print ("Server Has Been Authed")
 
 	N3 = random.getrandbits(128)
-	message = f'{N3},{N2+N3}'
+	message = f'{N2+N3},{N3}'
 	sendMessageRSA(clientSocket, message, serverPublicKey)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
@@ -163,6 +170,7 @@ def main(log):
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
 	N1 = random.getrandbits(128)
+	print(N1)
 
 	'''
 	try:
