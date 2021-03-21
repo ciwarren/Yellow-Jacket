@@ -21,7 +21,7 @@ try:
 
 	with open('public.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
-	publicKey = rsa.PrivateKey.load_pkcs1(keydata)
+	publicKey = rsa.PublicKey.load_pkcs1(keydata)
 	
 except:
 	print("Generating keys, could not find them locally!")
