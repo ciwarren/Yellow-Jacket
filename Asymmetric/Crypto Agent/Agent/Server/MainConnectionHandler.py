@@ -27,16 +27,14 @@ except:
 	print("Generating keys, could not find them locally!")
 	(publicKey, privateKey) = rsa.newkeys(512)
 	
-	file = open("public.pem", "wb")
-	file.write(bytes(publicKey))
+	file = open("public.pem", "w")
+	file.write(pubkey.save_pkcs1().decode('utf-8'))
 	file.close()
 
-	file = open("private.pem", "wb")
-	file.write(bytes(privateKey))
+	file = open("private.pem", "w")
+	file.write(privkey.save_pkcs1().decode('utf-8'))
 	file.close()
 	
-	
-
 def interpretConfig(file):
 	file = open(file, "r")
 	serverConfig = file.readlines()

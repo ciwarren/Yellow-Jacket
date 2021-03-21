@@ -152,7 +152,7 @@ def main(log):
 	PORTS.extend(range(10000, 11000))
 	lPort = random.choice(PORTS)
 	localAddress = (lIP, lPort, )
-	IP = "192.168.163.158"
+	IP = "192.168.1.158"
 	PORT = 1337
 	hostname = "client1"
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
