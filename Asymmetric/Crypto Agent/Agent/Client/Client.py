@@ -171,9 +171,10 @@ def main(log):
 
 	#message = f'{hostname},{N1},{status},{HMACGen(HMACKey,hostname)}'
 	#TODO: Send Client Public Key in this message
-	message = f'{hostname},{N1},{publicKey}'
+	message = f'{hostname},{N1},{publicKey.save_pkcs1().decode("utf-8")}'
 	#TODO: Message needs to be encrypted with the servers public key.
-	sendMessageRSA(clientSocket, message, serverPublicKey)
+	#sendMessageRSA(clientSocket, message, serverPublicKey)
+	sendMessage(clientSocket ,message)
 
 
 	cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey)
