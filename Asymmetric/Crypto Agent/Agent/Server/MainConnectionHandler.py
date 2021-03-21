@@ -30,10 +30,10 @@ except:
 	open("private.pem", "x")
 	file = open("public.pem", "wb")
 	file.write(publicKey)
-	file.close
+	file.close()
 	file = open("private.pem", "wb")
 	file.write(privateKey)
-	file.close
+	file.close()
 	
 	
 
