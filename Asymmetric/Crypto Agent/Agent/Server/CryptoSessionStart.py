@@ -29,15 +29,15 @@ def sendMessageRSA(clientSocket, message, clientPublicKey):
 
 def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
-	N2 = random.getrandbits(128)
-	message = f'{N2+N1},{N2}'
+	N2 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	message = f'{N2},{N2+N1}'
 	sendMessageRSA(socket, message, clientPublicKey)
 
 	#N2+N3, N3
 	message = receiveMessageRSA(socket, serverPrivateKey)
 	variables = message.split(",")
-	clientAuth = int(variables[0])
-	N3 = int(variables[1])
+	clientAuth = int(variables[1])
+	N3 = int(variables[0])
 
 	if (clientAuth - N2) != N3:
 		return "abort connection"

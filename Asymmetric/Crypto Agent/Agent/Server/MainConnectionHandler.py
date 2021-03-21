@@ -72,20 +72,14 @@ def sendMessage(clientSocket, message):
 	return
 
 def receiveMessageRSA(clientSocket):
-	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
-	messageHeader = messageHeader.decode('utf-8')
-	messageLength = int(messageHeader.strip())
 	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
-	message = message.decode('utf-8')
 	message = str(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, source):
 	clientPublic = clientPublicKeys[source]
-	message = str(message)
-	message = rsa.encrypt(message.encode('utf-8'), clientPublic)
-	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), clientPublic)
-	clientSocket.send(messageHeader + message)
+	message = rsa.encrypt(message, clientPublic)
+	clientSocket.send(message)
 	return
 
 

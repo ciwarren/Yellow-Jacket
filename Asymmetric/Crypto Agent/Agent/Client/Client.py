@@ -111,16 +111,16 @@ def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	#TODO: Recieve message encrypted with client publickey
 	message = receiveMessageRSA(clientSocket, privateKey)
 	variables = message.split(",")
-	serverAuth = int(variables[0])
-	N2 = int(variables[1])
+	serverAuth = int(variables[1])
+	N2 = int(variables[0])
 
 	if (serverAuth - N1) != N2:
 		return "fail"
 
 	print ("Server Has Been Authed")
 
-	N3 = random.getrandbits(128)
-	message = f'{N2+N3},{N3}'
+	N3 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	message = f'{N3},{N2+N3}'
 	sendMessageRSA(clientSocket, message, serverPublicKey)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
@@ -158,7 +158,7 @@ def main(log):
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
-	N1 = random.getrandbits(128)
+	N1 = random.getrandbits(128).to_bytes(16, byteorder='little')
 
 	'''
 	try:
