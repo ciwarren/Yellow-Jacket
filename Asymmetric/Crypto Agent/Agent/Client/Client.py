@@ -146,7 +146,7 @@ def main(log):
 	(publicKey, privateKey) = rsa.newkeys(512)
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
-	serverPublicKey = rsa.PrivateKey.load_pkcs1(keydata)
+	serverPublicKey = rsa.PublicKey.load_pkcs1(keydata)
 	lIP = '192.168.1.159'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))

@@ -28,11 +28,11 @@ except:
 	(publicKey, privateKey) = rsa.newkeys(512)
 	
 	file = open("public.pem", "w")
-	file.write(pubkey.save_pkcs1().decode('utf-8'))
+	file.write(rsa.PublicKey.save_pkcs1().decode('utf-8'))
 	file.close()
 
 	file = open("private.pem", "w")
-	file.write(privkey.save_pkcs1().decode('utf-8'))
+	file.write(rsa.PrivateKey.save_pkcs1().decode('utf-8'))
 	file.close()
 	
 def interpretConfig(file):
