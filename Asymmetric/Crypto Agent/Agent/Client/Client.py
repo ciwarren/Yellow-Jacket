@@ -144,6 +144,9 @@ def main(log):
 	#hostname = clientConfig[Hostname]
 	#TODO: Load client keys
 	(publicKey, privateKey) = rsa.newkeys(512)
+	with open('serverPublic.pem', mode='rb') as publicFile:
+		keydata = publicFile.read()
+	serverPublicKey = rsa.PrivateKey.load_pkcs1(keydata)
 	lIP = '192.168.163.130'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
