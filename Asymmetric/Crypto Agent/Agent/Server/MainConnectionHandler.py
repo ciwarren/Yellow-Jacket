@@ -26,8 +26,16 @@ try:
 except:
 	print("Generating keys, could not find them locally!")
 	(publicKey, privateKey) = rsa.newkeys(512)
-	#TODO: Write these to file
-
+	open("public.pem", "x")
+	open("private.pem", "x")
+	file = open("public.pem", "wb")
+	file.write(publicKey)
+	file.close
+	file = open("private.pem", "wb")
+	file.write(privateKey)
+	file.close
+	
+	
 
 def interpretConfig(file):
 	file = open(file, "r")
