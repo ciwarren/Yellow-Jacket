@@ -1,3 +1,4 @@
 # Recommended to install in virtual environment ./.venv
 # python3 -m pip install -r requirements.txt
 pycryptodome
+rsa
