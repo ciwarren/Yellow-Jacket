@@ -147,12 +147,12 @@ def main(log):
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
 	serverPublicKey = rsa.PrivateKey.load_pkcs1(keydata)
-	lIP = '192.168.163.130'
+	lIP = '192.168.163.159'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
 	lPort = random.choice(PORTS)
 	localAddress = (lIP, lPort, )
-	IP = "192.168.163.131"
+	IP = "192.168.163.158"
 	PORT = 1337
 	hostname = "client1"
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
