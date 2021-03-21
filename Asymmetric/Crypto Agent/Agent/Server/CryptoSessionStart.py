@@ -29,7 +29,7 @@ def sendMessageRSA(clientSocket, message, clientPublicKey):
 
 def main(socket, secret, clientPublicKey, serverPrivateKey, N1):
 	cryptoVariables = {}
-	N2 = random.getrandbits(128).to_bytes(16, byteorder='little')
+	N2 = random.getrandbits(128)
 	message = f'{N2},{N2+N1}'
 	sendMessageRSA(socket, message, clientPublicKey)
 
