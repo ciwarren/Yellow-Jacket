@@ -6,7 +6,6 @@
 	#https://asecuritysite.com/encryption/diffie_py
 from socketserver import socket
 import random
-from math import sqrt
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad

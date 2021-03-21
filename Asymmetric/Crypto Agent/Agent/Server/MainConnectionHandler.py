@@ -3,7 +3,6 @@ from socketserver import socket
 import select
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-import KeyExchangeServer
 import CryptoSessionStart
 import hashlib, rsa
 
