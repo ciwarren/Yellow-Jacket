@@ -168,7 +168,8 @@ def main():
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
 				#TODO: Make sure the line below will work for next message
-				clientPublicKeys[source] = variables[2]
+				clientPublicKeys[source] = rsa.PublicKey.load_pkcs1(variables[2])
+				print(clientPublicKeys[source])
 				#status = variables[2] Not using because of commented out code below
 				'''
 				Moving Elsewhere
