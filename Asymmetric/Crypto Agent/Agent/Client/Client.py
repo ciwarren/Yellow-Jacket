@@ -119,7 +119,7 @@ def interpretConfig(file):
 
 
 
-def cryptoSessionStart(clientSocket, secret, HMACKey, N1):
+def cryptoSessionStart(clientSocket, N1, privateKey):
 	#N2+N1, N2
 	#TODO: Recieve message encrypted with client publickey
 	message = receiveMessageEncryptedECB(clientSocket, secret)
@@ -160,6 +160,7 @@ def main(log):
 	#IP = clientConfig[ServerIP]
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
+	#TODO: Load client keys
 	lIP = '192.168.163.130'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
@@ -194,7 +195,7 @@ def main(log):
 
 	if "PHASE1" in status:
 		#TODO: Rework this phase part
-		cryptoVariables = cryptoSessionStart(clientSocket, N1)
+		cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey)
 	'''
 	if "PHASE2" in status:
 		secret = file.readline()
