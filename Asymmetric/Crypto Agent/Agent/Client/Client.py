@@ -67,35 +67,23 @@ def encryptMessageCBC(data, sessionKey, IV):
 	return payload
 
 #Used for all communication for cryptosessionstart
-def receiveMessageEncryptedECB(clientSocket, secret):
-	messageHeader = decryptMessageECB(clientSocket.recv(256), secret)
+
+
+def receiveMessageRSA(clientSocket, privateKey):
+	messageHeader = rsa.decrypt(clientSocket.recv(256), privateKey)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = decryptMessageECB(clientSocket.recv(messageLength), secret)
+	message = rsa.decrypt(clientSocket.recv(messageLength), privateKey)
 	message = message.decode('utf-8')
 	message = str(message)
 	return message
 
-
-def sendMessageEncryptedECB(clientSocket, message, secret):
+def sendMessageRSA(clientSocket, message, serverPublicKey):
 	message = str(message)
-	message = encryptMessageECB (message.encode('utf-8'), secret)
-	messageHeader = encryptMessageECB(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), secret)
+	message = rsa.encrypt(message.encode('utf-8'), serverPublicKey)
+	messageHeader = rsa.encrypt(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), serverPublicKey)
 	clientSocket.send(messageHeader + message)
 	return
-
-def decryptMessageECB(payload, secret):
-	secret = secret.encode('utf-8')
-	cipher = AES.new(secret, AES.MODE_ECB)
-	data = unpad(cipher.decrypt(payload), 256)
-	return data
-
-def encryptMessageECB(data, secret):
-	secret = secret.encode('utf-8')
-	cipher = AES.new(secret, AES.MODE_ECB)
-	data = pad(data,256)
-	payload = cipher.encrypt(data)
-	return payload
 
 
 def interpretConfig(file):
@@ -118,10 +106,10 @@ def interpretConfig(file):
 
 
 
-def cryptoSessionStart(clientSocket, N1, privateKey):
+def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	#N2+N1, N2
 	#TODO: Recieve message encrypted with client publickey
-	message = receiveMessageEncryptedECB(clientSocket, secret)
+	message = receiveMessageRSA(clientSocket, privateKey)
 	variables = message.split(",")
 	serverAuth = int(variables[0])
 	N2 = int(variables[1])
@@ -133,7 +121,7 @@ def cryptoSessionStart(clientSocket, N1, privateKey):
 
 	N3 = random.getrandbits(128)
 	message = f'{N2+N3},{N3}'
-	sendMessageEncryptedECB(clientSocket, message, secret)
+	sendMessageRSA(clientSocket, message, serverPublicKey)
 
 	IV = hashlib.sha256(str((N2 * N3)).encode()).hexdigest()
 	N2 = hashlib.sha256(str(N2).encode()).hexdigest()
@@ -182,20 +170,13 @@ def main(log):
 
 	#message = f'{hostname},{N1},{status},{HMACGen(HMACKey,hostname)}'
 	#TODO: Send Client Public Key in this message
-	message = f'{hostname},{N1}'
+	message = f'{hostname},{N1},{publicKey}'
 	#TODO: Message needs to be encrypted with the servers public key.
-	sendMessage(clientSocket, message)
+	sendMessageRSA(clientSocket, message, serverPublicKey)
 
-	status = receiveMessage(clientSocket)
 
-	if "PHASE1" in status:
-		#TODO: Rework this phase part
-		cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey)
-	'''
-	if "PHASE2" in status:
-		secret = file.readline()
-		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
-	'''
+	cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey)
+	
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
 
