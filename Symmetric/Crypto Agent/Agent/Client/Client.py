@@ -12,6 +12,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import hmac
 
+import secrets
+from tinyec import registry
+
 HEADERLENGTH = 10
 
 def isPrime(n):
@@ -138,21 +141,45 @@ def interpretConfig(file):
 			continue
 	return configDict
 
+def diffieHellman(clientSoecket):
+	chosen_curve = receiveMessage(clientSocket)
 
+	### Resource https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange-examples
+	def compress(public_key):
+    	return hex(public_key.x) + hex(public_key.y % 2)[2:]
+	
+	curve = registry.get_curve(chosen_curve)
+
+	client_private_key = secrets.randbelow(curve.field.n)
+	client_public_key = client_private_key * curve.g
+
+	sendMessage(client_socket, client_public_key)
+
+	server_public_key = receiveMessage(clientSocket)
+
+	shared_key = compress(client_private_key * server_public_key)[2:258].encode('utf-8')
+	print(shared_key)
+
+	### End Resource
+
+	try:
+		file = open("secret.txt", "w")
+
+	except:
+		open("secret.txt", "x")
+		file = open("secret.txt", "w")
+
+	file.write(secret)
+
+	file.close()
+
+	return secret
+'''
 def diffeHellman(clientSocket):
 	message = receiveMessage(clientSocket)
 	diffeVars = message.split(",")
 	p = int(diffeVars[0])
 	g = int(diffeVars[1])
-
-	'''
-	min = 100000
-	max = 999999
-	p = genPrime(min, max)
-	g = findPrimitive(p)
-	message =  f'{p},{g}'
-	sendMessage(clientSocket, message)
-	'''
 
 	a = random.getrandbits(160)
 	A = (g**a) % p 
@@ -177,7 +204,7 @@ def diffeHellman(clientSocket):
 	file.close()
 
 	return secret
-
+'''
 
 def cryptoSessionStart(clientSocket, secret, HMACKey, N1):
 	#N2+N1, N2
