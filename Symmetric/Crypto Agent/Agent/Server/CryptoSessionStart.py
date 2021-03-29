@@ -49,6 +49,7 @@ def encryptMessageECB(data, secret):
 	return payload
 
 def HMACGen(key, message):
+	message = str(message)
 	key = key.encode('utf-8')
 	message = message.encode('utf-8')
 	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()

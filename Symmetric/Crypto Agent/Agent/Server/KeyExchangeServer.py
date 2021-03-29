@@ -5,6 +5,10 @@ import random
 import hashlib
 from math import sqrt
 
+from tinyec import registry
+from tinyec import ec
+import secrets
+
 HEADERLENGTH = 10
 
 def sendMessage(clientSocket, message):
@@ -48,66 +52,66 @@ def genPrime(min, max):
 # factors of a number  
 def findPrimefactors(s, n) : 
   
-    # Print the number of 2s that divide n  
-    while (n % 2 == 0) : 
-        s.add(2)  
-        n = n // 2
+	# Print the number of 2s that divide n  
+	while (n % 2 == 0) : 
+		s.add(2)  
+		n = n // 2
   
-    # n must be odd at this po. So we can   
-    # skip one element (Note i = i +2)  
-    for i in range(3, int(sqrt(n)), 2): 
-          
-        # While i divides n, print i and divide n  
-        while (n % i == 0) : 
+	# n must be odd at this po. So we can   
+	# skip one element (Note i = i +2)  
+	for i in range(3, int(sqrt(n)), 2): 
+		  
+		# While i divides n, print i and divide n  
+		while (n % i == 0) : 
   
-            s.add(i)  
-            n = n // i  
-          
-    # This condition is to handle the case  
-    # when n is a prime number greater than 2  
-    if (n > 2) : 
-        s.add(n)  
+			s.add(i)  
+			n = n // i  
+		  
+	# This condition is to handle the case  
+	# when n is a prime number greater than 2  
+	if (n > 2) : 
+		s.add(n)  
   
 # Function to find smallest primitive  
 # root of n  
 
 def findPrimitive( n) : 
-    s = set()  
+	s = set()  
 
-    # Check if n is prime or not  
-    if (isPrime(n) == False):  
-        return -1
+	# Check if n is prime or not  
+	if (isPrime(n) == False):  
+		return -1
   
-    # Find value of Euler Totient function  
-    # of n. Since n is a prime number, the  
-    # value of Euler Totient function is n-1  
-    # as there are n-1 relatively prime numbers. 
-    phi = n - 1
+	# Find value of Euler Totient function  
+	# of n. Since n is a prime number, the  
+	# value of Euler Totient function is n-1  
+	# as there are n-1 relatively prime numbers. 
+	phi = n - 1
   
-    # Find prime factors of phi and store in a set  
-    findPrimefactors(s, phi)  
+	# Find prime factors of phi and store in a set  
+	findPrimefactors(s, phi)  
   
-    # Check for every number from 2 to phi  
-    for r in range(2, phi + 1):  
+	# Check for every number from 2 to phi  
+	for r in range(2, phi + 1):  
   
-        # Iterate through all prime factors of phi.  
-        # and check if we found a power with value 1  
-        flag = False
-        for it in s:  
+		# Iterate through all prime factors of phi.  
+		# and check if we found a power with value 1  
+		flag = False
+		for it in s:  
   
-            # Check if r^((phi)/primefactors) 
-            # mod n is 1 or not  
-            if (pow(r, phi // it, n) == 1):  
+			# Check if r^((phi)/primefactors) 
+			# mod n is 1 or not  
+			if (pow(r, phi // it, n) == 1):  
   
-                flag = True
-                break
-              
-        # If there was no power with value 1.  
-        if (flag == False): 
-            return r  
+				flag = True
+				break
+			  
+		# If there was no power with value 1.  
+		if (flag == False): 
+			return r  
   
-    # If no primitive root found  
-    return -1
+	# If no primitive root found  
+	return -1
 '''
 
 def main(clientSocket):
@@ -119,20 +123,24 @@ def main(clientSocket):
 
 	### Resource https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange-examples
 	def compress(public_key):
-    	return hex(public_key.x) + hex(public_key.y % 2)[2:]
+		return hex(public_key.x) + hex(public_key.y % 2)[2:]
 	
 	curve = registry.get_curve('brainpoolP256r1')
 
 	server_private_key = secrets.randbelow(curve.field.n)
 	server_public_key = server_private_key * curve.g
-
-	sendMessage(client_socket, server_public_key)
+	sendMessage(clientSocket, ','.join([str(server_public_key.x), str(server_public_key.y)]))
 
 	client_public_key = receiveMessage(clientSocket)
+	client_public_key = client_public_key.split(',')
+	client_public_key = ec.Point(curve, int(client_public_key[0]), int(client_public_key[1]))
 
-	shared_key = compress(server_private_key * client_public_key)[2:258].encode('utf-8')
+	shared_key = compress(server_private_key * client_public_key)
 	print(shared_key)
-
+	secret = hashlib.sha256(str(shared_key).encode()).hexdigest()
+	print(secret)
+	x = slice(32)
+	secret = secret[x]
 	### End Resource
 
 	try:
