@@ -11,6 +11,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import rsa
 import math
+from datetime import datetime
 
 HEADERLENGTH = 10
 
@@ -118,7 +119,6 @@ def interpretConfig(file):
 
 def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	#N2+N1, N2
-	#TODO: Recieve message encrypted with client publickey
 	message = receiveMessageRSA(clientSocket, privateKey)
 	print(message)
 	variables = message.split(",")
@@ -154,6 +154,7 @@ def main(log):
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
 	#TODO: Load client keys
+	timestamp_main_start = datetime.now()
 	(publicKey, privateKey) = rsa.newkeys(512)
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
@@ -188,8 +189,9 @@ def main(log):
 	#sendMessageRSA(clientSocket, message, serverPublicKey)
 	sendMessage(clientSocket ,message)
 
-
+	timestamp_crypto_session_start = datetime.now()
 	cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey)
+	timestamp_crypto_session_end = datetime.now()
 	
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
@@ -199,5 +201,11 @@ def main(log):
 	print(f'Sent message: {log}')
 
 	clientSocket.close()
+	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
+	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
+	print('Authentication process:')
+	print(delta_authentication)
+	print('Start to authenticated:')
+	print(delta_start_to_auth)
 
 main("This is a test")

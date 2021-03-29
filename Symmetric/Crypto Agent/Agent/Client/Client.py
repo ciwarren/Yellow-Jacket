@@ -11,6 +11,7 @@ import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import hmac
+from datetime import datetime
 
 import secrets
 import tinyec.ec as ec
@@ -252,6 +253,7 @@ def main(log):
 	#IP = clientConfig[ServerIP]
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
+	timestamp_main_start = datetime.now()
 	lIP = '192.168.1.158'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
@@ -285,10 +287,12 @@ def main(log):
 	status = receiveMessage(clientSocket)
 
 	if "PHASE1" in status:
+		timestamp_crypto_session_start = datetime.now()
 		secret = diffieHellman(clientSocket)
 		phase = receiveMessage(clientSocket)
 		print(phase)
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
+		timestamp_crypto_session_end = datetime.now()
 	'''
 	if "PHASE2" in status:
 		secret = file.readline()
@@ -302,5 +306,11 @@ def main(log):
 	print(f'Sent message: {log}')
 
 	clientSocket.close()
+	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
+	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
+	print('Authentication process:')
+	print(delta_authentication)
+	print('Start to authenticated:')
+	print(delta_start_to_auth)
 
 main("This is a test")
