@@ -13,7 +13,8 @@ from Crypto.Util.Padding import pad, unpad
 import hmac
 
 import secrets
-from tinyec import registry
+import tinyec.ec as ec
+import tinyec.registry as registry
 
 HEADERLENGTH = 10
 
@@ -33,6 +34,7 @@ def isPrime(n):
 
 
 def HMACGen(key, message):
+	message = str(message)
 	key = key.encode('utf-8')
 	message = message.encode('utf-8')
 	HMAC = hmac.new(key, message, hashlib.sha512).hexdigest()
@@ -141,25 +143,29 @@ def interpretConfig(file):
 			continue
 	return configDict
 
-def diffieHellman(clientSoecket):
+def diffieHellman(clientSocket):
 	chosen_curve = receiveMessage(clientSocket)
 
 	### Resource https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange-examples
 	def compress(public_key):
-    	return hex(public_key.x) + hex(public_key.y % 2)[2:]
-	
+		return hex(public_key.x) + hex(public_key.y % 2)[2:]
+
 	curve = registry.get_curve(chosen_curve)
 
 	client_private_key = secrets.randbelow(curve.field.n)
 	client_public_key = client_private_key * curve.g
 
-	sendMessage(client_socket, client_public_key)
+	sendMessage(clientSocket, ','.join([str(client_public_key.x), str(client_public_key.y)]))
 
 	server_public_key = receiveMessage(clientSocket)
+	server_public_key = server_public_key.split(',')
+	server_public_key = ec.Point(curve, int(server_public_key[0]), int(server_public_key[1]))
 
-	shared_key = compress(client_private_key * server_public_key)[2:258].encode('utf-8')
+	shared_key = compress(client_private_key * server_public_key)
 	print(shared_key)
-
+	secret = hashlib.sha256(str(shared_key).encode()).hexdigest()
+	x = slice(32)
+	secret = secret[x]
 	### End Resource
 
 	try:
@@ -246,15 +252,15 @@ def main(log):
 	#IP = clientConfig[ServerIP]
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
-	lIP = '192.168.163.130'
+	lIP = '192.168.1.158'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
 	lPort = random.choice(PORTS)
 	localAddress = (lIP, lPort, )
-	IP = "192.168.163.131"
+	IP = "192.168.1.135"
 	PORT = 1337
 	hostname = "client1"
-	HMAC = interpretConfig(open("/var/Agent/Client/hmacs.txt", "r"))
+	HMAC = interpretConfig("hmacs.txt")
 	HMACKey = HMAC[hostname]
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	clientSocket.bind((localAddress))
@@ -279,7 +285,7 @@ def main(log):
 	status = receiveMessage(clientSocket)
 
 	if "PHASE1" in status:
-		secret = diffeHellman(clientSocket)
+		secret = diffieHellman(clientSocket)
 		phase = receiveMessage(clientSocket)
 		print(phase)
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)

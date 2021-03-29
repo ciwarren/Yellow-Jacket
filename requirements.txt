@@ -1,6 +1,7 @@
 # Recommended to install in virtual environment ./.venv
 # python3 -m pip install -r requirements.txt
+openssl-python
 pycryptodome
 rsa
 tinyec
-secrets
+python-secrets
