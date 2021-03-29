@@ -100,7 +100,7 @@ def main():
 	#serverConfig = interpretConfig("/var/Agent/Server/serverConfig.txt")
 	#lIP = serverConfig[ServerIP]
 	#lPort = serverConfig[ServerPort]
-	lIP = "192.168.163.131"
+	lIP = "192.168.1.135"
 	lPort = 1337
 	localAddress = (lIP,lPort, )
 	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +109,8 @@ def main():
 	serverSocket.listen()
 	sockets_list = [serverSocket]
 	clients = {}
-	HMAC = interpretConfig(open("/var/Agent/Server/hmacs.txt", "r"))
+	#HMAC = interpretConfig(open("/var/Agent/Server/hmacs.txt", "r"))
+	HMAC = interpretConfig("hmacs.txt")
 	#secrets = database.secretTable()
 	secrets = {}
 	print ("\n")
