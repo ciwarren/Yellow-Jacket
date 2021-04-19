@@ -43,11 +43,12 @@ def receiveMessageEncryptedCBC(clientSocket, sessionKey, IV):
 	return message
 
 
-def sendMessageEncryptedCBC(clientSocket, message, sessionKey, IV):
-	message = str(message)
-	message = encryptMessageCBC(message.encode('utf-8'), sessionKey, IV)
+def sendMessageEncryptedCBC(clientSocket, message, clientPrivateKey, sessionKey, IV):
+	message = str(message).encode('utf-8')
+	signature = rsa.sign(message, clientPrivateKey, 'SHA-256')
+	message = encryptMessageCBC(message, sessionKey, IV)
 	messageHeader = encryptMessageCBC(f"{len(message):<{HEADERLENGTH}}".encode('utf-8'), sessionKey, IV)
-	clientSocket.send(messageHeader + message)
+	clientSocket.send(messageHeader + signature + message)
 	return
 
 
@@ -80,7 +81,7 @@ def receiveMessageRSA(clientSocket, privateKey):
 	for x in range(0,math.floor(messageLength/64)):
 		message+= rsa.decrypt(messageTotal[(x*64):((x+1)*64)], privateKey).decode('utf-8')
 	message = str(message)
-	print(message)
+	#print(message)
 	return message
 
 def sendMessageRSA(clientSocket, message, serverPublicKey):
@@ -92,7 +93,7 @@ def sendMessageRSA(clientSocket, message, serverPublicKey):
 		messageTotal += encryptedChunk
 		message = message[min(53,len(message)):]
 	messageHeader = rsa.encrypt(f"{len(messageTotal):<{HEADERLENGTH}}".encode('utf-8'), serverPublicKey)
-	print(messageHeader)
+	#print(messageHeader)
 	clientSocket.send(messageHeader + messageTotal)
 	return
 
@@ -120,7 +121,7 @@ def interpretConfig(file):
 def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	#N2+N1, N2
 	message = receiveMessageRSA(clientSocket, privateKey)
-	print(message)
+	#print(message)
 	variables = message.split(",")
 	serverAuth = int(variables[0])
 	N2 = int(variables[1])
@@ -128,7 +129,7 @@ def cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey):
 	if (serverAuth - N1) != N2:
 		return "fail"
 
-	print ("Server Has Been Authed")
+	#print ("Server Has Been Authed")
 
 	N3 = random.getrandbits(128)
 	message = f'{N2+N3},{N3}'
@@ -158,11 +159,11 @@ def main(log):
 	try:
 		with open('clientPublic.pem', mode='rb') as publicFile:
 			keydata = publicFile.read()
-			publickey = rsa.PublicKey.load_pkcs1(keydata)
+			publicKey = rsa.PublicKey.load_pkcs1(keydata)
 		
 		with open('clientPrivate.pem', mode='rb') as privateFile:
 			keydata = privateFile.read()
-			privatekey = rsa.PrivateKey.load_pkcs1(keydata)
+			privateKey = rsa.PrivateKey.load_pkcs1(keydata)
 	
 	except:
 		(publicKey, privateKey) = rsa.newkeys(512)
@@ -193,7 +194,7 @@ def main(log):
 	clientSocket.bind((localAddress))
 	clientSocket.connect((IP, PORT))
 	N1 = random.getrandbits(128)
-	print(N1)
+	#print(N1)
 
 	'''
 	try:
@@ -219,10 +220,10 @@ def main(log):
 		print("Failed to authenticate with server")
 
 	timestamp_message_start = datetime.now()
-	sendMessageEncryptedCBC(clientSocket, log, cryptoVariables["sessionKey"], cryptoVariables["IV"])
+	sendMessageEncryptedCBC(clientSocket, log, privateKey, cryptoVariables["sessionKey"], cryptoVariables["IV"])
 	timestamp_message_end = datetime.now()
 
-	print(f'Sent message: {log}')
+	#print(f'Sent message: {log}')
 
 	clientSocket.close()
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
