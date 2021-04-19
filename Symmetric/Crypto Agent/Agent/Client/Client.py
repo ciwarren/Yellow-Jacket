@@ -301,11 +301,14 @@ def main(log):
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
 
+	timestamp_message_start = datetime.now()
 	sendMessageEncryptedCBC(clientSocket, log, cryptoVariables["sessionKey"], cryptoVariables["IV"])
+	timestamp_message_end = datetime.now()
 
 	print(f'Sent message: {log}')
 
 	clientSocket.close()
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
 	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
-	return(delta_authentication,delta_start_to_auth)
+	delta_message = timestamp_message_end - timestamp_message_start
+	return(delta_authentication,delta_start_to_auth,delta_message)
