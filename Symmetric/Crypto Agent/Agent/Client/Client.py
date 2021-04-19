@@ -309,6 +309,3 @@ def main(log):
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
 	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
 	return(delta_authentication,delta_start_to_auth)
-
-
-main("This is a test")
