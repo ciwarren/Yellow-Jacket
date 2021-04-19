@@ -308,9 +308,7 @@ def main(log):
 	clientSocket.close()
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
 	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
-	print('Authentication process:')
-	print(delta_authentication)
-	print('Start to authenticated:')
-	print(delta_start_to_auth)
+	return(delta_authentication,delta_start_to_auth)
+
 
 main("This is a test")

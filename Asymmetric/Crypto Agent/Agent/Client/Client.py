@@ -156,15 +156,16 @@ def main(log):
 	#TODO: Load client keys
 	timestamp_main_start = datetime.now()
 	(publicKey, privateKey) = rsa.newkeys(512)
+	timestamp_end_generate_keys = datetime.now()
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
 	serverPublicKey = rsa.PublicKey.load_pkcs1(keydata)
-	lIP = '192.168.1.159'
+	lIP = '192.168.1.158'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
 	lPort = random.choice(PORTS)
 	localAddress = (lIP, lPort, )
-	IP = "192.168.1.158"
+	IP = "192.168.1.135"
 	PORT = 1337
 	hostname = "client1"
 	clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -203,9 +204,6 @@ def main(log):
 	clientSocket.close()
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
 	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
-	print('Authentication process:')
-	print(delta_authentication)
-	print('Start to authenticated:')
-	print(delta_start_to_auth)
+	return(delta_authentication,delta_start_to_auth)
 
 main("This is a test")
