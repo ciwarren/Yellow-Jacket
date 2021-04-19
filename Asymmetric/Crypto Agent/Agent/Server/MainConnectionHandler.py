@@ -100,9 +100,12 @@ def receiveMessageEncrypted(clientSocket, source):
 	messageHeader = decryptMessage(clientSocket.recv(256), sessionKey, IV)
 	messageHeader = messageHeader.decode('utf-8')
 	messageLength = int(messageHeader.strip())
-	message = decryptMessage(clientSocket.recv(messageLength), sessionKey, IV)
+	signature = clientSocket.recv(64)
+	message = clientSocket.recv(messageLength)
+	message = decryptMessage(message, sessionKey, IV)
 	message = message.decode('utf-8')
 	message = str(message)
+	print(message)
 	return message
 
 def sendMessageEncrypted(clientSocket, message, source):
@@ -137,7 +140,7 @@ def main():
 	#serverConfig = interpretConfig("/var/Agent/Server/serverConfig.txt")
 	#lIP = serverConfig[ServerIP]
 	#lPort = serverConfig[ServerPort]
-	lIP = "192.168.1.158"
+	lIP = "192.168.1.135"
 	lPort = 1337
 	localAddress = (lIP,lPort, )
 	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
