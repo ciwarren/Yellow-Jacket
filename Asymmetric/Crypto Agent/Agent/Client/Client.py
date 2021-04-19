@@ -155,7 +155,28 @@ def main(log):
 	#hostname = clientConfig[Hostname]
 	#TODO: Load client keys
 	timestamp_main_start = datetime.now()
-	(publicKey, privateKey) = rsa.newkeys(512)
+	try:
+		with open('clientPublic.pem', mode='rb') as publicFile:
+			keydata = publicFile.read()
+			publickey = rsa.PublicKey.load_pkcs1(keydata)
+		
+		with open('clientPrivate.pem', mode='rb') as privateFile:
+			keydata = privateFile.read()
+			privatekey = rsa.PrivateKey.load_pkcs1(keydata)
+	
+	except:
+		(publicKey, privateKey) = rsa.newkeys(512)
+		
+		file = open("clientPublic.pem", "w")
+		file.write(publicKey.save_pkcs1().decode('utf-8'))
+		file.close()
+
+		file = open("clientPrivate.pem", "w")
+		file.write(privateKey.save_pkcs1().decode('utf-8'))
+		file.close()
+
+
+	
 	timestamp_end_generate_keys = datetime.now()
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
@@ -205,5 +226,3 @@ def main(log):
 	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
 	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
 	return(delta_authentication,delta_start_to_auth)
-
-main("This is a test")
