@@ -115,10 +115,7 @@ def findPrimitive( n) :
 '''
 
 def main(clientSocket):
-	message = f'PHASE1'
-	sendMessage(clientSocket, message)
-
-	message = 'brainpoolP256r1'
+	message = f'PHASE1,brainpoolP256r1'
 	sendMessage(clientSocket, message)
 
 	### Resource https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange-examples
