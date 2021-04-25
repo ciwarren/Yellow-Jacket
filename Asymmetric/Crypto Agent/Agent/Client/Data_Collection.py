@@ -10,8 +10,8 @@ def analyze_metric(name, metric):
     print(f'Max (ms):\t{str(max(metric)/1000)}\n')
 
 
+delta_key_generation = []
 delta_authentication = []
-delta_start_to_auth = []
 delta_message = []
 trials = 10
 
@@ -20,15 +20,16 @@ t0results = Client.main('Test 0')
 for n in range(1,trials+1):
     results = Client.main(f'Test {str(n)}')
     print(results)
-    delta_authentication.append(results[0].microseconds)
-    delta_start_to_auth.append(results[1].microseconds)
+    delta_key_generation.append(results[0].microseconds)
+    delta_authentication.append(results[1].microseconds)
     delta_message.append(results[2].microseconds)
     time.sleep(3)
+          
+print(f'\n------------------------------------\nTest conducted with {str(trials)} trials\n')
 
-print('\n------------------------------------\n')
-print(f'Authentication\n {str(t0results[0].microseconds/1000)}')
-print(f'Start thru Authentication\n {str(t0results[1].microseconds/1000)}')
-print(f'Message\n {str(t0results[2].microseconds/1000)}')   
+analyze_metric('Key Generation', delta_key_generation)
+analyze_metric('Authentication', delta_authentication)
+analyze_metric('Message', delta_message)  
 
 
 print(f'Test conducted with {str(trials)} trials\n')

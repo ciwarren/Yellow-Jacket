@@ -155,7 +155,7 @@ def main(log):
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
 	#TODO: Load client keys
-	timestamp_main_start = datetime.now()
+	timestamp_key_generation_start = datetime.now()
 	try:
 		with open('clientPublic.pem', mode='rb') as publicFile:
 			keydata = publicFile.read()
@@ -178,10 +178,10 @@ def main(log):
 
 
 	
-	timestamp_end_generate_keys = datetime.now()
 	with open('serverPublic.pem', mode='rb') as publicFile:
 		keydata = publicFile.read()
 	serverPublicKey = rsa.PublicKey.load_pkcs1(keydata)
+	timestamp_key_generation_end = datetime.now()
 	lIP = '192.168.1.158'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
@@ -212,9 +212,9 @@ def main(log):
 	#sendMessageRSA(clientSocket, message, serverPublicKey)
 	sendMessage(clientSocket ,message)
 
-	timestamp_crypto_session_start = datetime.now()
+	timestamp_authentication_start = datetime.now()
 	cryptoVariables = cryptoSessionStart(clientSocket, N1, privateKey, serverPublicKey)
-	timestamp_crypto_session_end = datetime.now()
+	timestamp_authentication_end = datetime.now()
 	
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
@@ -226,7 +226,7 @@ def main(log):
 	#print(f'Sent message: {log}')
 
 	clientSocket.close()
-	delta_authentication = timestamp_crypto_session_end - timestamp_crypto_session_start
-	delta_start_to_auth = timestamp_crypto_session_end - timestamp_main_start
+	delta_key_generation = timestamp_key_generation_end - timestamp_key_generation_start
+	delta_authentication = timestamp_authetication_end - timestamp_authetication_start
 	delta_message = timestamp_message_end - timestamp_message_start
-	return(delta_authentication,delta_start_to_auth,delta_message)
+	return(delta_key_generation,delta_authentication,delta_message)
