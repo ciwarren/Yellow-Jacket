@@ -292,9 +292,9 @@ def main(log):
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
 		timestamp_crypto_session_end = datetime.now()
 
-	if "PHASE2" in status:
+	elif "PHASE2" in status:
 		secret = file.readline()
-		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
+		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
 
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
