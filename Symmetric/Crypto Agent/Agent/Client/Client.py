@@ -144,8 +144,8 @@ def interpretConfig(file):
 			continue
 	return configDict
 
-def diffieHellman(clientSocket):
-	chosen_curve = receiveMessage(clientSocket)
+def diffieHellman(clientSocket, status):
+	chosen_curve = status.split(",")[1]
 
 	### Resource https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange-examples
 	def compress(public_key):
@@ -269,16 +269,14 @@ def main(log):
 	clientSocket.connect((IP, PORT))
 	N1 = random.getrandbits(128)
 
-	'''
+	
 	try:
 		file = open("/var/Agent/Secure/secret.txt", "r")
 		status = "PHASE2"
 
 	except:
 		status = "PHASE1"
-	'''
 
-	status = "PHASE1"
 
 	#message = f'{hostname},{N1},{status},{HMACGen(HMACKey,hostname)}'
 	message = f'{hostname},{N1},{status}'
@@ -288,16 +286,16 @@ def main(log):
 
 	if "PHASE1" in status:
 		timestamp_crypto_session_start = datetime.now()
-		secret = diffieHellman(clientSocket)
+		secret = diffieHellman(clientSocket, status)
 		phase = receiveMessage(clientSocket)
 		print(phase)
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
 		timestamp_crypto_session_end = datetime.now()
-	'''
+
 	if "PHASE2" in status:
 		secret = file.readline()
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, N1)
-	'''
+
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
 

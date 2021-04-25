@@ -130,7 +130,7 @@ def main():
 				source = variables[0]
                 #N1 is used for CryptoSessionStart
 				N1 = int(variables[1])
-				#status = variables[2] Not using because of commented out code below
+				status = variables[2] 
 				'''
 				Moving Elsewhere
 				HMACToCheck = variables[3]
@@ -140,7 +140,7 @@ def main():
 					continue 
 				'''
 
-				'''
+
 				if source in secrets and "PHASE2" in status:
              		#If a long-term secret exists in the database
 					sockets_list.append(clientSocket)
@@ -156,42 +156,25 @@ def main():
 				else:
 	        		#If no long-term secret exists, create one
 					sourceSecret = KeyExchangeServer.main(clientSocket)
-	            	#Enter secret in database for next restart
+					#Enter secret in database for next restart
 					#database.createEntry(table = sources, source = source, secret = sourceSecret)
-	            	#Update current dictonary
+					#Update current dictonary
 					secrets[source] = sourceSecret
+					sourceHMACKey = HMAC[source]
 					sockets_list.append(clientSocket)
 					clients[clientSocket] = source
 					print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
-					cryptoVariables = CryptoSessionStart.main(clientSocket, sourceSecret, N1)
+					cryptoVariables = CryptoSessionStart.main(clientSocket, sourceSecret, sourceHMACKey, N1)
 					if  "abort connection" in cryptoVariables:
 						print ("Connection Aborted")
 						return
 					sessionKeys[source] = cryptoVariables["sessionKey"]
 					IVs[source] = cryptoVariables["IV"]
-
 					print(f'sessionKey: {sessionKeys[source]}, IV: {IVs[source]}')
-					'''
 
 
 
-				#If no long-term secret exists, create one
-				sourceSecret = KeyExchangeServer.main(clientSocket)
-	            #Enter secret in database for next restart
-				#database.createEntry(table = sources, source = source, secret = sourceSecret)
-	            #Update current dictonary
-				secrets[source] = sourceSecret
-				sourceHMACKey = HMAC[source]
-				sockets_list.append(clientSocket)
-				clients[clientSocket] = source
-				print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
-				cryptoVariables = CryptoSessionStart.main(clientSocket, sourceSecret, sourceHMACKey, N1)
-				if  "abort connection" in cryptoVariables:
-					print ("Connection Aborted")
-					return
-				sessionKeys[source] = cryptoVariables["sessionKey"]
-				IVs[source] = cryptoVariables["IV"]
-				print(f'sessionKey: {sessionKeys[source]}, IV: {IVs[source]}')
+		
 
 			else:
              	# Get source by notified socket, so we will know who sent the message
