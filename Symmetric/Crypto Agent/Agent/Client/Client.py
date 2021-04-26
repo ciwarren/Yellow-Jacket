@@ -253,12 +253,12 @@ def main(log):
 	#IP = clientConfig[ServerIP]
 	#PORT = clientConfig[ServerPort]
 	#hostname = clientConfig[Hostname]
-	lIP = '192.168.1.158'
+	lIP = '192.168.0.101'
 	PORTS = []
 	PORTS.extend(range(10000, 11000))
 	lPort = random.choice(PORTS)
 	localAddress = (lIP, lPort, )
-	IP = "192.168.1.135"
+	IP = "192.168.0.100"
 	PORT = 1337
 	hostname = "client1"
 	HMAC = interpretConfig("hmacs.txt")
@@ -270,7 +270,7 @@ def main(log):
 
 	
 	try:
-		file = open("/var/Agent/Secure/secret.txt", "r")
+		file = open("secret.txt", "r")
 		status = "PHASE2"
 
 	except:

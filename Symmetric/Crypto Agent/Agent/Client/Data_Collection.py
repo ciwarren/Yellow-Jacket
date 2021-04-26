@@ -15,6 +15,7 @@ delta_authentication = []
 delta_message = []
 trials = 10
 
+t0results = Client.main('Test 0')
 
 for n in range(1,trials+1):
     results = Client.main(f'Test {str(n)}')

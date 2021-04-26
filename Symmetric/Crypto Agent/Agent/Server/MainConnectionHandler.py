@@ -148,8 +148,9 @@ def main():
 					print('Accepted new connection from {}:{}, source: {}'.format(*clientAddress, source))
 	                #Retrieve secret
 					sourceSecret = secrets[source]
+					sourceHMACKey = HMAC[source]
 	                #Generate session key and n2, n3 for source
-					cryptoVariables = CryptoSessionStart.main(clientSocket, sourceSecret, N1)
+					cryptoVariables = CryptoSessionStart.main(clientSocket, sourceSecret, sourceHMACKey, N1)
 					sessionKeys[source] = cryptoVariables["sessionKey"]
 					IVs[source] = cryptoVariables["IV"]
 	                 
