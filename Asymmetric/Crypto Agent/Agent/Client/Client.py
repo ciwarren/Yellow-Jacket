@@ -227,6 +227,6 @@ def main(log):
 
 	clientSocket.close()
 	delta_key_generation = timestamp_key_generation_end - timestamp_key_generation_start
-	delta_authentication = timestamp_authetication_end - timestamp_authetication_start
+	delta_authentication = timestamp_authentication_end - timestamp_authentication_start
 	delta_message = timestamp_message_end - timestamp_message_start
 	return(delta_key_generation,delta_authentication,delta_message)
