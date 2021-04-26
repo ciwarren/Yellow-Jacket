@@ -15,7 +15,6 @@ delta_authentication = []
 delta_message = []
 trials = 10
 
-t0results = Client.main('Test 0')
 
 for n in range(1,trials+1):
     results = Client.main(f'Test {str(n)}')
@@ -26,6 +25,8 @@ for n in range(1,trials+1):
     time.sleep(3)
           
 print(f'\n------------------------------------\nTest conducted with {str(trials)} trials\n')
+
+print(f'Initial Test: {t0results[0].microseconds/1000} {t0results[1].microseconds/1000} {t0results[2].microseconds/1000}')
 
 analyze_metric('Key Generation', delta_key_generation)
 analyze_metric('Authentication', delta_authentication)

@@ -291,7 +291,7 @@ def main(log):
 		print(phase)
 		timestamp_authentication_start = datetime.now()
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
-		timestamp_authetication_end = datetime.now()
+		timestamp_authentication_end = datetime.now()
 
 	elif "PHASE2" in status:
 		timestamp_key_generation_start = datetime.now()
@@ -299,7 +299,7 @@ def main(log):
 		timestamp_key_generation_end = datetime.now()
 		timestamp_authentication_start = datetime.now()
 		cryptoVariables = cryptoSessionStart(clientSocket, secret, HMACKey, N1)
-		timestamp_authetication_end = datetime.now()
+		timestamp_authentication_end = datetime.now()
 		
 	if "fail" in cryptoVariables:
 		print("Failed to authenticate with server")
@@ -312,6 +312,6 @@ def main(log):
 
 	clientSocket.close()
 	delta_key_generation = timestamp_key_generation_end - timestamp_key_generation_start
-	delta_authentication = timestamp_authetication_end - timestamp_authetication_start
+	delta_authentication = timestamp_authentication_end - timestamp_authentication_start
 	delta_message = timestamp_message_end - timestamp_message_start
 	return(delta_key_generation,delta_authentication,delta_message)

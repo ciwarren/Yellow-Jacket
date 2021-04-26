@@ -100,7 +100,7 @@ def main():
 	#serverConfig = interpretConfig("/var/Agent/Server/serverConfig.txt")
 	#lIP = serverConfig[ServerIP]
 	#lPort = serverConfig[ServerPort]
-	lIP = "192.168.1.135"
+	lIP = "192.168.0.100"
 	lPort = 1337
 	localAddress = (lIP,lPort, )
 	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

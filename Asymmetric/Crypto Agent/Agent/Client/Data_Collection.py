@@ -27,13 +27,8 @@ for n in range(1,trials+1):
           
 print(f'\n------------------------------------\nTest conducted with {str(trials)} trials\n')
 
+print(f'Initial Test: {t0results[0].microseconds/1000} {t0results[1].microseconds/1000} {t0results[2].microseconds/1000}')
+
 analyze_metric('Key Generation', delta_key_generation)
 analyze_metric('Authentication', delta_authentication)
 analyze_metric('Message', delta_message)  
-
-
-print(f'Test conducted with {str(trials)} trials\n')
-
-analyze_metric('Authentication', delta_authentication)
-analyze_metric('Start thru Authentication', delta_start_to_auth)
-analyze_metric('Message', delta_message)
